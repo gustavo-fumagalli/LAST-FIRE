@@ -61,6 +61,7 @@ export class Game extends Phaser.Scene {
         this.score = 0;
         this.centreX = this.scale.width * 0.5;
         this.centreY = this.scale.height * 0.5;
+        this.gameStarted = false;
 
         // Controle de waves (adicione mais waves se quiser)
         this.currentWave = 0;
