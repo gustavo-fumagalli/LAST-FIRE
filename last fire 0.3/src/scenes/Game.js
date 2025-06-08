@@ -59,6 +59,7 @@ export class Game extends Phaser.Scene {
         this.score = 0;
         this.centreX = this.scale.width * 0.5;
         this.centreY = this.scale.height * 0.5;
+        this.gameStarted = false;
 
         this.tiles = [50, 50, 50, 50, 50, 50, 50, 50, 50, 110, 110, 110, 110, 110, 50, 50, 50, 50, 50, 50, 50, 50, 50, 110, 110, 110, 110, 110, 36, 48, 60, 72, 84];
         this.tileSize = 32;
@@ -68,6 +69,7 @@ export class Game extends Phaser.Scene {
         this.mapWidth = Math.ceil(this.scale.width / this.tileSize);
         this.scrollSpeed = 0;
         this.scrollMovement = 0;
+        
     }
 
     initGameUi() {
@@ -130,13 +132,13 @@ export class Game extends Phaser.Scene {
 
     initInput() {
         this.cursors = this.input.keyboard.createCursorKeys();
-        this.input.keyboard.on('keydown-SPACE', () => {
-            if (this.gameStarted) {
-                this.fireBullet(this.player.x, this.player.y - 40);
-            } else {
-                this.startGame();
-            }
-        });
+       this.input.keyboard.on('keydown-SPACE', () => {
+    if (this.gameStarted) {
+        this.fireBullet(this.player.x, this.player.y - 40);
+    } else {
+        this.startGame(); // isso já esconde o tutorial
+    }
+    });
     }
 
    
@@ -224,7 +226,7 @@ export class Game extends Phaser.Scene {
 
     GameOver() {
         this.gameStarted = false;
-        this.gameOverText.setVisible(true);
+        
         this.scene.stop();
         this.scene.start('GameOver');
     }
