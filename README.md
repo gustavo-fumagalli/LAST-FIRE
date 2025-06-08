@@ -74,7 +74,7 @@ Daniel Tsuyama
 ---
 
 <div align="center">
-  <img src="/assets/logo.png" width="256"/>
+  <img src="lastfire%20-%201.0/assets/logo.png" width="256"/>
   <br/>
   <b>Prepare-se para a última batalha...</b>
 </div>
