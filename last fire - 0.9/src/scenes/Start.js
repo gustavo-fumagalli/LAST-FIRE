@@ -2,6 +2,7 @@ export class Start extends Phaser.Scene {
     constructor() {
         super('Start');
         this.isShowingCredits = false;
+        this.started = false; // flag para controlar o estado do menu
     }
 
     preload() {
@@ -41,35 +42,48 @@ export class Start extends Phaser.Scene {
             ease: 'Sine.easeInOut'
         });
 
+        // Texto inicial piscando: "APERTE QUALQUER TECLA PARA COMEÇAR"
+        this.pressAnyKeyText = this.add.text(this.cameras.main.width / 2, 500,
+            'APERTE QUALQUER TECLA PARA COMEÇAR', {
+                fontSize: '28px',
+                fill: '#ffff00',
+                fontFamily: '"Press Start 2P", monospace'
+            }).setOrigin(0.5);
+
+        this.blinkTween = this.tweens.add({
+            targets: this.pressAnyKeyText,
+            alpha: 0,
+            duration: 800,
+            yoyo: true,
+            repeat: -1
+        });
+
+        // Cria o menu, mas já esconde os botões
         this.createMainMenuButtons();
+        this.buttons.forEach(btn => btn.setVisible(false));
 
-        this.input.keyboard.on('keydown-UP', () => {
-            if (!this.isShowingCredits) {
-                this.selectedIndex = (this.selectedIndex - 1 + this.buttons.length) % this.buttons.length;
-                this.menuMoveSound.play();
-                this.updateButtonSelection();
-            }
-        });
+        // Desativa o controle do menu enquanto estiver no texto inicial
+        this.disableMenuControls();
 
-        this.input.keyboard.on('keydown-DOWN', () => {
-            if (!this.isShowingCredits) {
-                this.selectedIndex = (this.selectedIndex + 1) % this.buttons.length;
-                this.menuMoveSound.play();
-                this.updateButtonSelection();
-            }
+        // Espera qualquer tecla para começar
+        this.input.keyboard.once('keydown', () => {
+            this.startMenu();
         });
+    }
 
-        this.input.keyboard.on('keydown-ENTER', () => {
-            if (!this.isShowingCredits) {
-                this.selectOption(this.selectedIndex);
-            }
-        });
+    startMenu() {
+        if (this.started) return;
+        this.started = true;
 
-        this.input.keyboard.on('keydown-ESC', () => {
-            if (this.isShowingCredits) {
-                this.hideCredits();
-            }
-        });
+        // Para o tween de piscar e esconde o texto inicial
+        this.blinkTween.stop();
+        this.pressAnyKeyText.setVisible(false);
+
+        // Mostra os botões do menu
+        this.buttons.forEach(btn => btn.setVisible(true));
+
+        // Habilita os controles normais
+        this.enableMenuControls();
     }
 
     createMainMenuButtons() {
@@ -99,12 +113,12 @@ export class Start extends Phaser.Scene {
 
     createPixelButton(x, y, label, callback) {
         const btn = this.add.text(x, y, label, {
-            fontFamily: '"Press Start 2P", monospace', // Fonte pixelada
+            fontFamily: '"Press Start 2P", monospace',
             fontSize: '28px',
-            fill: '#00ff00',                // Cor verde retrô
-            backgroundColor: '#000000',     // Fundo preto
+            fill: '#00ff00',
+            backgroundColor: '#000000',
             padding: { left: 20, right: 20, top: 10, bottom: 10 },
-            stroke: '#00ff00',              // Contorno verde
+            stroke: '#00ff00',
             strokeThickness: 2,
             align: 'center'
         }).setOrigin(0.5).setInteractive({ useHandCursor: true });
@@ -150,47 +164,85 @@ export class Start extends Phaser.Scene {
         });
     }
 
+    // Desabilita controles do menu (seta listeners off)
+    disableMenuControls() {
+        if (this.upKeyListener) this.input.keyboard.off('keydown-UP', this.upKeyListener);
+        if (this.downKeyListener) this.input.keyboard.off('keydown-DOWN', this.downKeyListener);
+        if (this.enterKeyListener) this.input.keyboard.off('keydown-ENTER', this.enterKeyListener);
+        if (this.escKeyListener) this.input.keyboard.off('keydown-ESC', this.escKeyListener);
+    }
+
+    // Habilita controles do menu (seta listeners on)
+    enableMenuControls() {
+        this.upKeyListener = () => {
+            if (!this.isShowingCredits) {
+                this.selectedIndex = (this.selectedIndex - 1 + this.buttons.length) % this.buttons.length;
+                this.menuMoveSound.play();
+                this.updateButtonSelection();
+            }
+        };
+        this.downKeyListener = () => {
+            if (!this.isShowingCredits) {
+                this.selectedIndex = (this.selectedIndex + 1) % this.buttons.length;
+                this.menuMoveSound.play();
+                this.updateButtonSelection();
+            }
+        };
+        this.enterKeyListener = () => {
+            if (!this.isShowingCredits) {
+                this.selectOption(this.selectedIndex);
+            }
+        };
+        this.escKeyListener = () => {
+            if (this.isShowingCredits) {
+                this.hideCredits();
+            }
+        };
+
+        this.input.keyboard.on('keydown-UP', this.upKeyListener);
+        this.input.keyboard.on('keydown-DOWN', this.downKeyListener);
+        this.input.keyboard.on('keydown-ENTER', this.enterKeyListener);
+        this.input.keyboard.on('keydown-ESC', this.escKeyListener);
+    }
+
     selectOption(index) {
         switch (index) {
-            case 0: // Jogar
+            case 0:
                 this.menuMusic.stop();
                 this.scene.start('Game');
                 break;
-            case 1: // Créditos
+            case 1:
                 this.showCredits();
                 break;
-            case 2: // Sair
+            case 2:
                 window.close();
                 break;
         }
     }
 
     showCredits() {
-        // Remove botões
         this.buttons.forEach(btn => btn.destroy());
         this.buttons = [];
 
         this.isShowingCredits = true;
 
-        // Fundo preto semitransparente
         this.creditsBackground = this.add.rectangle(640, 360, 1280, 720, 0x000000, 0.9);
 
         const creditText = `DESENVOLVIMENTO
-                            Seu Nome
+Seu Nome
 
-                            ARTE
-                            Nome da Arte
+ARTE
+Nome da Arte
 
-                            MÚSICA
-                            Nome da Trilha
+MÚSICA
+Nome da Trilha
 
-                            FEITO COM
-                            Phaser 3
+FEITO COM
+Phaser 3
 
-                            OBRIGADO POR JOGAR!`;
+OBRIGADO POR JOGAR!`;
 
-        // Container para controlar a rolagem e transformação
-        this.creditsContainer = this.add.container(640, 800); // container centralizado
+        this.creditsContainer = this.add.container(640, 800);
 
         const creditsLines = creditText.split('\n');
         this.creditsTexts = [];
@@ -203,7 +255,7 @@ export class Start extends Phaser.Scene {
                 align: 'center',
                 stroke: '#000000',
                 strokeThickness: 3
-            }).setOrigin(0.5, 0); // Centraliza horizontalmente
+            }).setOrigin(0.5, 0);
             this.creditsContainer.add(text);
             this.creditsTexts.push(text);
         });
@@ -217,14 +269,12 @@ export class Start extends Phaser.Scene {
                 const progress = Phaser.Math.Clamp((target.y + 400) / (800 + 400), 0, 1);
                 const scale = 0.5 + progress * 1.5;
                 target.setScale(scale);
-
             },
             onComplete: () => {
                 this.hideCredits();
             }
         });
 
-        // Texto para "VOLTAR" aparece durante a animação, clicável para sair rápido
         this.backButton = this.add.text(640, 650, 'VOLTAR (ESC)', {
             fontSize: '32px',
             fill: '#ffffff',
@@ -250,8 +300,8 @@ export class Start extends Phaser.Scene {
         }
 
         if (this.creditsBackground) {
-        this.creditsBackground.destroy();
-        this.creditsBackground = null;
+            this.creditsBackground.destroy();
+            this.creditsBackground = null;
         }
 
         this.isShowingCredits = false;
@@ -260,14 +310,5 @@ export class Start extends Phaser.Scene {
         if (!this.menuMusic.isPlaying) {
             this.menuMusic.play();
         }
-    }
-
-    update() {
-        this.colorHue = (this.colorHue || 0) + 1;
-        if (this.colorHue >= 360) this.colorHue = 0;
-
-        const rgbColor = Phaser.Display.Color.HSVToRGB(this.colorHue / 360, 1, 1);
-        const hexColor = Phaser.Display.Color.GetColor(rgbColor.r, rgbColor.g, rgbColor.b);
-        this.lastFireText.setColor('#' + hexColor.toString(16).padStart(6, '0'));
     }
 }

@@ -1,3 +1,4 @@
+// [IMPORTS]
 import ASSETS from '../assets.js';
 import ANIMATION from '../animation.js';
 import Player from '../gameObjects/Player.js';
@@ -16,7 +17,7 @@ export class Game extends Phaser.Scene {
         this.load.audio('shootSound', 'assets/shoot.wav');
         this.load.audio('explosionSound', 'assets/explosion.wav');
         this.load.audio('hitSound', 'assets/hit.wav');
-        this.load.audio('bgMusic', 'assets/music.mp3'); // 🎵 Música de fundo
+        this.load.audio('bgMusic', 'assets/music.mp3');
         this.load.image('heart', 'assets/heart.png');
         this.load.spritesheet(ANIMATION.explosion.texture, ANIMATION.explosion.path, {
             frameWidth: ANIMATION.explosion.frameWidth,
@@ -25,45 +26,37 @@ export class Game extends Phaser.Scene {
     }
 
     create() {
-    this.bg = this.add.image(this.scale.width / 2, this.scale.height / 2, 'background')
-        .setDisplaySize(this.scale.width, this.scale.height)
-        .setDepth(-100);
+        this.bg = this.add.image(this.scale.width / 2, this.scale.height / 2, 'background')
+            .setDisplaySize(this.scale.width, this.scale.height)
+            .setDepth(-100);
 
-    this.initVariables();
-    this.initGameUi();
-    this.initAnimations();
-    this.initPlayer();
-    this.initInput();
-    this.initPhysics();
+        this.initVariables();
+        this.initGameUi();
+        this.initAnimations();
+        this.initPlayer();
+        this.initInput();
+        this.initPhysics();
 
-    this.shootSound = this.sound.add('shootSound');
-    this.explosionSound = this.sound.add('explosionSound');
-    this.hitSound = this.sound.add('hitSound');
+        this.shootSound = this.sound.add('shootSound');
+        this.explosionSound = this.sound.add('explosionSound');
+        this.hitSound = this.sound.add('hitSound');
 
-    // 🎵 Instancia a música de fundo
-    this.bgMusic = this.sound.add('bgMusic', {
-        loop: true,
-        volume: 0.5
-    });
+        this.bgMusic = this.sound.add('bgMusic', { loop: true, volume: 0.5 });
 
-    // 🎮 ESC para abrir o menu de pausa
-    this.input.keyboard.on('keydown-ESC', () => {
-        if (!this.scene.isActive('PauseMenu')) {
-            this.scene.launch('PauseMenu');
-            this.scene.pause();
-            this.bgMusic.pause(); // 🎵 Pausa a música do jogo
-        }
-    });
+        this.input.keyboard.on('keydown-ESC', () => {
+            if (!this.scene.isActive('PauseMenu')) {
+                this.scene.launch('PauseMenu');
+                this.scene.pause();
+                this.bgMusic.pause();
+            }
+        });
 
-    // ✅ Retoma a música quando a cena Game é retomada
-    this.events.on('resume', () => {
-        if (this.bgMusic && this.bgMusic.isPaused) {
-            this.bgMusic.resume(); // 🎵 Retoma a música do jogo
-        }
-    });
-}
-
-
+        this.events.on('resume', () => {
+            if (this.bgMusic && this.bgMusic.isPaused) {
+                this.bgMusic.resume();
+            }
+        });
+    }
 
     update() {
         if (!this.gameStarted) return;
@@ -76,7 +69,7 @@ export class Game extends Phaser.Scene {
         this.centreY = this.scale.height * 0.5;
         this.gameStarted = false;
         this.bgMusicStarted = false;
-        this.healthKits = this.add.group(); // grupo para kits médicos
+        this.healthKits = this.add.group();
 
         this.currentWave = 0;
         this.waves = [
@@ -104,11 +97,11 @@ export class Game extends Phaser.Scene {
         const heartY = 10;
         const heartSpacing = 50;
 
-        this.maxHearts = 10; // número máximo de corações exibíveis
+        this.maxHearts = 10;
         for (let i = 0; i < this.maxHearts; i++) {
             const heart = this.add.image(heartXStart + i * heartSpacing, heartY, 'heart');
             heart.setScale(0.1).setScrollFactor(0).setDepth(100).setOrigin(0, 0);
-            heart.setVisible(false); // inicialmente invisível
+            heart.setVisible(false);
             this.hearts.push(heart);
         }
 
@@ -126,30 +119,35 @@ export class Game extends Phaser.Scene {
             fontFamily: 'Arial Black', fontSize: 64, color: '#ffffff',
             stroke: '#000000', strokeThickness: 8, align: 'center'
         }).setOrigin(0.5).setDepth(100).setVisible(false);
+
+        // 👇 UI da barra do boss
+        this.bossHealthBarBg = this.add.graphics().setDepth(100).setVisible(false);
+        this.bossHealthBar = this.add.graphics().setDepth(101).setVisible(false);
+        this.bossNameText = this.add.text(this.centreX, this.scale.height - 120, '', {
+            fontFamily: 'Arial Black',
+            fontSize: 32,
+            color: '#ff0000',
+            stroke: '#000000',
+            strokeThickness: 6,
+            align: 'center'
+        }).setOrigin(0.5).setDepth(102).setVisible(false);
     }
 
     updateHealthDisplay(health) {
-        
         for (let i = 0; i < this.hearts.length; i++) {
-    if (i < health) {
-        if (!this.hearts[i].visible) this.hearts[i].setVisible(true);
-    } else {
-        this.hearts[i].setVisible(false);
-    }
-    }
+            this.hearts[i].setVisible(i < health);
+        }
 
-    // Adiciona mais corações se necessário
-    if (health > this.hearts.length) {
         const heartSpacing = 50;
         const heartY = 10;
         let lastX = this.hearts.length > 0 ? this.hearts[this.hearts.length - 1].x : 15;
 
-    for (let i = this.hearts.length; i < health; i++) {
-        const heart = this.add.image(lastX + heartSpacing, heartY, 'heart');
-        heart.setScale(0.1).setScrollFactor(0).setDepth(100).setOrigin(0, 0);
-        this.hearts.push(heart);
-    }
-    }
+        while (this.hearts.length < health) {
+            const heart = this.add.image(lastX + heartSpacing, heartY, 'heart');
+            heart.setScale(0.1).setScrollFactor(0).setDepth(100).setOrigin(0, 0);
+            this.hearts.push(heart);
+            lastX = heart.x;
+        }
     }
 
     initAnimations() {
@@ -169,11 +167,7 @@ export class Game extends Phaser.Scene {
         this.physics.add.overlap(this.player, this.enemyBulletGroup, this.hitPlayer, null, this);
         this.physics.add.overlap(this.playerBulletGroup, this.enemyGroup, this.hitEnemy, null, this);
         this.physics.add.overlap(this.player, this.enemyGroup, this.hitPlayer, null, this);
-
-        this.physics.add.overlap(this.player, this.healthKits, (player, kit) => {
-            kit.collect(player);
-        }, null, this);
-    
+        this.physics.add.overlap(this.player, this.healthKits, (player, kit) => kit.collect(player), null, this);
     }
 
     initPlayer() {
@@ -183,12 +177,25 @@ export class Game extends Phaser.Scene {
 
     initInput() {
         this.cursors = this.input.keyboard.createCursorKeys();
+
         this.input.keyboard.on('keydown-SPACE', () => {
             if (this.gameStarted) {
                 this.fireBullet(this.player.x, this.player.y - 40);
             } else {
                 this.startGame();
             }
+        });
+
+        // 👇 Atalho F7 para pular direto para o boss (modo dev)
+        this.input.keyboard.on('keydown-F7', () => {
+            if (!this.gameStarted) {
+                this.startGame();
+            }
+            this.enemyGroup.clear(true, true); // remove inimigos existentes
+            this.remainingEnemies = 0;
+            this.currentWave = this.waves.length - 1;
+            this.spawnBoss();
+            console.log('[DEV] Boss ativado diretamente com F7');
         });
     }
 
@@ -234,32 +241,33 @@ export class Game extends Phaser.Scene {
         if (this.bossActive && enemy === this.boss) {
             this.bossActive = false;
             this.bossDefeated = true;
-            this.time.delayedCall(2000, () => {
-                this.showVictory();
-            });
+            this.hideBossHealthBar();
+            this.time.delayedCall(2000, () => this.showVictory());
             return;
         }
 
         if (this.remainingEnemies === 0 && !this.bossActive) {
             if (this.currentWave === this.waves.length - 1) {
-            this.spawnBoss();
+                this.spawnBoss();
             } else {
-            this.spawnHealthKit();
-            this.time.delayedCall(1500, () => {
-            this.startWave(this.currentWave + 1);
-            });
+                this.spawnHealthKit();
+                this.time.delayedCall(1500, () => this.startWave(this.currentWave + 1));
             }
         }
-        
     }
 
     spawnBoss() {
-        this.bossActive = true;
-        this.boss = new EnemyFlying(this, 0, 0, 0.0003, 10);
-        this.boss.health = 50;
-        this.enemyGroup.add(this.boss);
-        this.showWaveText('BOSS FINAL');
-    }
+    this.bossActive = true;
+    this.boss = new EnemyFlying(this, 0, 0, 0.0003, 10);
+    this.boss.health = 50;
+    this.boss.maxHealth = 50;
+    this.boss.setScale(3);  // Aumenta o tamanho do sprite do boss
+    this.enemyGroup.add(this.boss);
+
+    this.showBossHealthBar(this.boss.health, this.boss.maxHealth);
+    this.showWaveText('BOSS FINAL');
+}
+
 
     addExplosion(x, y) {
         this.explosionSound.play();
@@ -283,6 +291,10 @@ export class Game extends Phaser.Scene {
         this.updateScore(10);
         bullet.remove();
         enemy.hit(bullet.getPower());
+
+        if (enemy === this.boss && this.bossActive) {
+            this.updateBossHealthBar(this.boss.health, this.boss.maxHealth);
+        }
     }
 
     startWave(waveNumber) {
@@ -329,9 +341,7 @@ export class Game extends Phaser.Scene {
             align: 'center'
         }).setOrigin(0.5).setDepth(101);
 
-        this.time.delayedCall(2000, () => {
-            this.waveText.destroy();
-        });
+        this.time.delayedCall(2000, () => this.waveText.destroy());
     }
 
     updateScore(points) {
@@ -341,20 +351,49 @@ export class Game extends Phaser.Scene {
 
     GameOver() {
         this.gameStarted = false;
-
-        if (this.bgMusic && this.bgMusic.isPlaying) {
-            this.bgMusic.stop();
-        }
-
+        if (this.bgMusic && this.bgMusic.isPlaying) this.bgMusic.stop();
         this.scene.stop();
         this.scene.start('GameOver');
     }
 
     spawnHealthKit() {
-    const x = Phaser.Math.Between(100, this.scale.width - 100);
-    const y = Phaser.Math.Between(100, this.scale.height - 150);
-    const kit = new HealthKit(this, x, y);
-    this.healthKits.add(kit);
+        const x = Phaser.Math.Between(100, this.scale.width - 100);
+        const y = Phaser.Math.Between(100, this.scale.height - 150);
+        const kit = new HealthKit(this, x, y);
+        this.healthKits.add(kit);
     }
 
+    showBossHealthBar(current, max) {
+        this.bossHealthBarBg.setVisible(true).clear();
+        this.bossHealthBar.setVisible(true).clear();
+        this.bossNameText.setVisible(true).setText('HUGO, o Fumero');
+
+        const barWidth = 600;
+        const barHeight = 20;
+        const x = this.scale.width / 2 - barWidth / 2;
+        const y = this.scale.height - 80;
+
+        this.bossHealthBarBg.fillStyle(0x000000);
+        this.bossHealthBarBg.fillRect(x - 2, y - 2, barWidth + 4, barHeight + 4);
+
+        this.updateBossHealthBar(current, max);
+    }
+
+    updateBossHealthBar(current, max) {
+        const barWidth = 600;
+        const barHeight = 20;
+        const x = this.scale.width / 2 - barWidth / 2;
+        const y = this.scale.height - 80;
+        const percent = Phaser.Math.Clamp(current / max, 0, 1);
+
+        this.bossHealthBar.clear();
+        this.bossHealthBar.fillStyle(0xff0000);
+        this.bossHealthBar.fillRect(x, y, barWidth * percent, barHeight);
+    }
+
+    hideBossHealthBar() {
+        this.bossHealthBar.setVisible(false).clear();
+        this.bossHealthBarBg.setVisible(false).clear();
+        this.bossNameText.setVisible(false);
+    }
 }
