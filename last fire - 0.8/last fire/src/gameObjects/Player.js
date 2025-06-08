@@ -2,11 +2,11 @@ import ASSETS from '../assets.js';
 
 export default class Player extends Phaser.Physics.Arcade.Sprite {
     velocityIncrement = 50;
-    velocityMax = 200;
+    velocityMax = 300;
     drag = 1000;
-    fireRate = 20;
+    fireRate = 22;
     fireCounter = 0;
-    health = 3;
+    health = 30;
 
     constructor(scene, x, y, shipId) {
         super(scene, x, y, ASSETS.spritesheet.ships.key, shipId);

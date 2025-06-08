@@ -9,16 +9,23 @@ export class GameOver extends Phaser.Scene {
 
     create() {
         const video = this.add.video(this.scale.width / 2, this.scale.height / 2, 'gameover').setOrigin(0.5).setScale(1);
-        video.play(true);
+        video.play();
+        this.returningToMenu = false;
 
         video.video.addEventListener('ended', () => {
-            this.scene.start('Start'); // volta para menu inicial após o vídeo
+        if (!this.returningToMenu) {
+        this.returningToMenu = true;
+        this.scene.start('Start'); // volta para o menu inicial
+        }
         });
 
         // Pular vídeo com clique
-        this.input.once('pointerdown', () => {
+       this.input.once('pointerdown', () => {
+            if (!this.returningToMenu) {
+            this.returningToMenu = true;
             video.stop();
             this.scene.start('Start');
-        });
+            }
+            });
     }
 }

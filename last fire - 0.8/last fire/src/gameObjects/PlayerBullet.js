@@ -2,7 +2,7 @@ import ASSETS from '../assets.js';
 
 export default class PlayerBullet extends Phaser.Physics.Arcade.Sprite {
     power = 1;
-    moveVelocity = 1000;
+    moveVelocity = 800;
 
     constructor(scene, x, y, power) {
         super(scene, x, y, ASSETS.spritesheet.tiles.key, power-1);

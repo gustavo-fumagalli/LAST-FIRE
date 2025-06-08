@@ -5,7 +5,7 @@ export default class EnemyFlying extends Phaser.Physics.Arcade.Sprite {
     power = 1;
 
     fireCounterMin = 200;  // intervalo mínimo entre tiros
-    fireCounterMax = 400;  // intervalo máximo entre tiros
+    fireCounterMax = 300;  // intervalo máximo entre tiros
     fireCounter = 0;
 
     paths = [
@@ -15,12 +15,13 @@ export default class EnemyFlying extends Phaser.Physics.Arcade.Sprite {
         [[1330, 360], [640, 50], [50, 360], [640, 350], [1180, 360], [640, 50], [50, 360], [640, 370], [1330, 360]],
     ];
 
-    constructor(scene, shipId, pathId, speed = 0.002, power = 1) {
+    constructor(scene, shipId, pathId, speed = 0.002, power = 1, health = 1) {
         const startingFrame = 12;
         super(scene, 0, 0, ASSETS.spritesheet.ships.key, startingFrame + shipId);
 
         this.scene = scene;
         this.power = power;
+        this.health = health;
         this.pathSpeed = speed;
 
         scene.add.existing(this);

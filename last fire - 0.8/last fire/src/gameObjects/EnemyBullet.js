@@ -2,7 +2,7 @@ import ASSETS from '../assets.js';
 
 export default class EnemyBullet extends Phaser.Physics.Arcade.Sprite {
     power = 1;
-    moveVelocity = 300; // velocidade base da bala
+    moveVelocity = 400; // velocidade base da bala
 
     constructor(scene, x, y, power = 1) {
         const tileId = 11;
@@ -21,7 +21,7 @@ export default class EnemyBullet extends Phaser.Physics.Arcade.Sprite {
         this.setSize(16, 24);               // hitbox ajustada
         this.setFlipY(true);                // sprite invertido (para baixo)
         this.setDepth(10);                  // render acima de planos inferiores
-        this.setVelocityY(this.moveVelocity * (0.5 + this.power * 0.25)); // velocidade baseada no poder
+        this.setVelocityY(this.moveVelocity * (0.5 + this.power * 0.1)); // velocidade baseada no poder
     }
 
     preUpdate(time, delta) {

@@ -5,6 +5,7 @@ import PlayerBullet from '../gameObjects/PlayerBullet.js';
 import EnemyFlying from '../gameObjects/EnemyFlying.js';
 import EnemyBullet from '../gameObjects/EnemyBullet.js';
 import Explosion from '../gameObjects/Explosion.js';
+import HealthKit from '../gameObjects/HealthKit.js';
 
 export class Game extends Phaser.Scene {
     constructor() {
@@ -75,13 +76,20 @@ export class Game extends Phaser.Scene {
         this.centreY = this.scale.height * 0.5;
         this.gameStarted = false;
         this.bgMusicStarted = false;
+        this.healthKits = this.add.group(); // grupo para kits médicos
 
         this.currentWave = 0;
         this.waves = [
-            { count: 5, speed: 0.0005, power: 1 },
-            { count: 8, speed: 0.0007, power: 1 },
-            { count: 10, speed: 0.0009, power: 1 },
-            { count: 15, speed: 0.001, power: 1 },
+            { count: 10, speed: 0.0002, power: 1, health: 1 },
+            { count: 12, speed: 0.0003, power: 1, health: 1 },
+            { count: 15, speed: 0.0003, power: 1, health: 1 },
+            { count: 18, speed: 0.0003, power: 1, health: 1 },
+            { count: 18, speed: 0.0003, power: 1, health: 2 },
+            { count: 20, speed: 0.0004, power: 2, health: 2 },
+            { count: 20, speed: 0.0004, power: 2, health: 2 },
+            { count: 22, speed: 0.0005, power: 2, health: 2 },
+            { count: 22, speed: 0.0005, power: 2, health: 2 },
+            { count: 25, speed: 0.0005, power: 2, health: 3 },
         ];
         this.remainingEnemies = 0;
         this.spawnEnemyCounter = 0;
@@ -96,9 +104,11 @@ export class Game extends Phaser.Scene {
         const heartY = 10;
         const heartSpacing = 50;
 
-        for (let i = 0; i < 3; i++) {
+        this.maxHearts = 10; // número máximo de corações exibíveis
+        for (let i = 0; i < this.maxHearts; i++) {
             const heart = this.add.image(heartXStart + i * heartSpacing, heartY, 'heart');
             heart.setScale(0.1).setScrollFactor(0).setDepth(100).setOrigin(0, 0);
+            heart.setVisible(false); // inicialmente invisível
             this.hearts.push(heart);
         }
 
@@ -119,9 +129,27 @@ export class Game extends Phaser.Scene {
     }
 
     updateHealthDisplay(health) {
-        this.hearts.forEach((heart, index) => {
-            heart.setVisible(index < health);
-        });
+        
+        for (let i = 0; i < this.hearts.length; i++) {
+    if (i < health) {
+        if (!this.hearts[i].visible) this.hearts[i].setVisible(true);
+    } else {
+        this.hearts[i].setVisible(false);
+    }
+    }
+
+    // Adiciona mais corações se necessário
+    if (health > this.hearts.length) {
+        const heartSpacing = 50;
+        const heartY = 10;
+        let lastX = this.hearts.length > 0 ? this.hearts[this.hearts.length - 1].x : 15;
+
+    for (let i = this.hearts.length; i < health; i++) {
+        const heart = this.add.image(lastX + heartSpacing, heartY, 'heart');
+        heart.setScale(0.1).setScrollFactor(0).setDepth(100).setOrigin(0, 0);
+        this.hearts.push(heart);
+    }
+    }
     }
 
     initAnimations() {
@@ -141,6 +169,11 @@ export class Game extends Phaser.Scene {
         this.physics.add.overlap(this.player, this.enemyBulletGroup, this.hitPlayer, null, this);
         this.physics.add.overlap(this.playerBulletGroup, this.enemyGroup, this.hitEnemy, null, this);
         this.physics.add.overlap(this.player, this.enemyGroup, this.hitPlayer, null, this);
+
+        this.physics.add.overlap(this.player, this.healthKits, (player, kit) => {
+            kit.collect(player);
+        }, null, this);
+    
     }
 
     initPlayer() {
@@ -189,8 +222,8 @@ export class Game extends Phaser.Scene {
         this.enemyBulletGroup.remove(bullet, true, true);
     }
 
-    addEnemy(shipId, pathId, speed, power) {
-        const enemy = new EnemyFlying(this, shipId, pathId, speed, power);
+    addEnemy(shipId, pathId, speed, power, health) {
+        const enemy = new EnemyFlying(this, shipId, pathId, speed, power, health);
         this.enemyGroup.add(enemy);
     }
 
@@ -209,19 +242,21 @@ export class Game extends Phaser.Scene {
 
         if (this.remainingEnemies === 0 && !this.bossActive) {
             if (this.currentWave === this.waves.length - 1) {
-                this.spawnBoss();
+            this.spawnBoss();
             } else {
-                this.time.delayedCall(1500, () => {
-                    this.startWave(this.currentWave + 1);
-                });
+            this.spawnHealthKit();
+            this.time.delayedCall(1500, () => {
+            this.startWave(this.currentWave + 1);
+            });
             }
         }
+        
     }
 
     spawnBoss() {
         this.bossActive = true;
         this.boss = new EnemyFlying(this, 0, 0, 0.0003, 10);
-        this.boss.health = 30;
+        this.boss.health = 50;
         this.enemyGroup.add(this.boss);
         this.showWaveText('BOSS FINAL');
     }
@@ -265,10 +300,11 @@ export class Game extends Phaser.Scene {
         for (let i = 0; i < wave.count; i++) {
             this.time.delayedCall(i * 400, () => {
                 this.addEnemy(
-                    Phaser.Math.RND.between(0, 11),
+                    Phaser.Math.RND.between(8, 11),
                     Phaser.Math.RND.between(0, 3),
                     wave.speed,
-                    wave.power
+                    wave.power,
+                    wave.health
                 );
             });
         }
@@ -313,4 +349,12 @@ export class Game extends Phaser.Scene {
         this.scene.stop();
         this.scene.start('GameOver');
     }
+
+    spawnHealthKit() {
+    const x = Phaser.Math.Between(100, this.scale.width - 100);
+    const y = Phaser.Math.Between(100, this.scale.height - 150);
+    const kit = new HealthKit(this, x, y);
+    this.healthKits.add(kit);
+    }
+
 }
