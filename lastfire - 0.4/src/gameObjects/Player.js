@@ -2,7 +2,7 @@ import ASSETS from '../assets.js';
 
 export default class Player extends Phaser.Physics.Arcade.Sprite {
     velocityIncrement = 50;
-    velocityMax = 450;
+    velocityMax = 200;
     drag = 1000;
     fireRate = 20;
     fireCounter = 0;

@@ -31,26 +31,33 @@ export default class EnemyFlying extends Phaser.Physics.Arcade.Sprite {
 
         this.fireCounter = Phaser.Math.Between(this.fireCounterMin, this.fireCounterMax);
         this.initPath(pathId);
+
+        this.initPath(pathId, speed); // path setup
+        this.pathDirection = 1; // 1 = indo; -1 = voltando
     }
 
     preUpdate(time, delta) {
         super.preUpdate(time, delta);
 
-        if (this.pathIndex > 1) return;
-
-        this.path.getPoint(Phaser.Math.Clamp(this.pathIndex, 0, 1), this.pathVector);
+        // Atualiza posição no path
+        this.path.getPoint(this.pathIndex, this.pathVector);
         this.setPosition(this.pathVector.x, this.pathVector.y);
 
-        this.pathIndex += this.pathSpeed;
+        // Incrementa ou decrementa pathIndex dependendo da direção
+        this.pathIndex += this.pathSpeed * this.pathDirection;
 
-        if (this.pathIndex > 1) {
-            this.die();
-            return;
+        // Inverte a direção quando chega no fim ou início do path
+        if (this.pathIndex >= 1) {
+            this.pathIndex = 1;
+            this.pathDirection = -1;
+        } else if (this.pathIndex <= 0) {
+            this.pathIndex = 0;
+            this.pathDirection = 1;
         }
 
-        if (this.fireCounter > 0) {
-            this.fireCounter--;
-        } else {
+        // update firing interval (mantém o resto igual)
+        if (this.fireCounter > 0) this.fireCounter--;
+        else {
             this.fire();
         }
     }

@@ -45,10 +45,12 @@ export class Game extends Phaser.Scene {
                 this.scene.pause();
             }
         });
+
+        
     }
 
     update() {
-       
+
 
         if (!this.gameStarted) return;
 
@@ -59,17 +61,20 @@ export class Game extends Phaser.Scene {
         this.score = 0;
         this.centreX = this.scale.width * 0.5;
         this.centreY = this.scale.height * 0.5;
-        this.gameStarted = false;
 
-        this.tiles = [50, 50, 50, 50, 50, 50, 50, 50, 50, 110, 110, 110, 110, 110, 50, 50, 50, 50, 50, 50, 50, 50, 50, 110, 110, 110, 110, 110, 36, 48, 60, 72, 84];
-        this.tileSize = 32;
-        this.mapOffset = 10;
-        this.mapTop = -this.mapOffset * this.tileSize;
-        this.mapHeight = Math.ceil(this.scale.height / this.tileSize) + this.mapOffset + 1;
-        this.mapWidth = Math.ceil(this.scale.width / this.tileSize);
-        this.scrollSpeed = 0;
-        this.scrollMovement = 0;
-        
+        // Controle de waves (adicione mais waves se quiser)
+        this.currentWave = 0;
+        this.waves = [
+            { count: 5, speed: 0.0005, power: 1 },
+            { count: 8, speed: 0.0007, power: 1 },
+            { count: 10, speed: 0.0009, power: 1 },
+            { count: 15, speed: 0.001, power: 1 },
+        ];
+        this.remainingEnemies = 0;
+        this.spawnEnemyCounter = 0;
+        this.bossActive = false;      
+        this.bossDefeated = false;    
+        this.boss = null;             // referência ao boss (se precisar)
     }
 
     initGameUi() {
@@ -132,23 +137,23 @@ export class Game extends Phaser.Scene {
 
     initInput() {
         this.cursors = this.input.keyboard.createCursorKeys();
-       this.input.keyboard.on('keydown-SPACE', () => {
-    if (this.gameStarted) {
-        this.fireBullet(this.player.x, this.player.y - 40);
-    } else {
-        this.startGame(); // isso já esconde o tutorial
-    }
-    });
+        this.input.keyboard.on('keydown-SPACE', () => {
+            if (this.gameStarted) {
+                this.fireBullet(this.player.x, this.player.y - 40);
+            } else {
+                this.startGame();
+            }
+        });
     }
 
-   
+
 
     startGame() {
         this.gameStarted = true;
         this.tutorialText.setVisible(false);
-
-        this.addEnemy(0, 0, 0.002, 1);
-        this.addFlyingGroup();
+        this.startWave(0);
+        // this.addEnemy(0, 0, 0.002, 1);
+        // this.addFlyingGroup();
     }
 
     fireBullet(x, y) {
@@ -170,21 +175,21 @@ export class Game extends Phaser.Scene {
         this.enemyBulletGroup.remove(bullet, true, true);
     }
 
-    addFlyingGroup() {
-        this.timedEvent = this.time.addEvent({
-            delay: 1000,
-            callback: () => {
-                this.addEnemy(
-                    Phaser.Math.Between(0, 11),
-                    Phaser.Math.Between(0, 3),
-                    Phaser.Math.FloatBetween(0.0005, 0.0001),
-                    Phaser.Math.Between(1, 1)
-                );
-            },
-            callbackScope: this,
-            loop: true
-        });
-    }
+    // addFlyingGroup() {
+    //     this.timedEvent = this.time.addEvent({
+    //         delay: 1000,
+    //         callback: () => {
+    //             this.addEnemy(
+    //                 Phaser.Math.Between(0, 11),
+    //                 Phaser.Math.Between(0, 3),
+    //                 Phaser.Math.FloatBetween(0.0005, 0.0001),
+    //                 Phaser.Math.Between(1, 1)
+    //             );
+    //         },
+    //         callbackScope: this,
+    //         loop: true
+    //     });
+    // }
 
     addEnemy(shipId, pathId, speed, power) {
         const enemy = new EnemyFlying(this, shipId, pathId, speed, power);
@@ -193,6 +198,41 @@ export class Game extends Phaser.Scene {
 
     removeEnemy(enemy) {
         this.enemyGroup.remove(enemy, true, true);
+        this.remainingEnemies--;
+
+        // Se era o boss
+        if (this.bossActive && enemy === this.boss) {
+            this.bossActive = false;
+            this.bossDefeated = true;
+            // Depois de uns 2 segundos, pode chamar a cutscene/vitória
+            this.time.delayedCall(2000, () => {
+            this.showVictory(); // ou chame um método para a cutscene
+            });
+            return;
+        }
+
+        if (this.remainingEnemies === 0 && !this.bossActive) {
+            if (this.currentWave === this.waves.length - 1) {
+                // Chama o boss!
+                this.spawnBoss();
+            } else {
+                this.time.delayedCall(1500, () => {
+                this.startWave(this.currentWave + 1);
+                });
+            }
+        }
+    }
+
+    spawnBoss() {
+        this.bossActive = true;
+        // Exemplo simples: usa o EnemyFlying, mas pode ser um novo objeto depois!
+        // AQUI: shipId = 0 (ou outro), pathId = 0 (ou outro), speed menor, power maior
+        this.boss = new EnemyFlying(this, 0, 0, 0.0003, 10); 
+        this.boss.health = 30; // Deixe bem resistente!
+        this.enemyGroup.add(this.boss);
+
+        // Pode mostrar um texto "BOSS FINAL!"
+        this.showWaveText('BOSS FINAL');
     }
 
     addExplosion(x, y) {
@@ -219,6 +259,54 @@ export class Game extends Phaser.Scene {
         enemy.hit(bullet.getPower());
     }
 
+    startWave(waveNumber) {
+    this.currentWave = waveNumber;
+    const wave = this.waves[waveNumber];
+
+    if (!wave) {
+        // Você pode criar um modo infinito ou mostrar "Parabéns"
+        this.showVictory(); // Crie essa função se quiser!
+        return;
+    }
+
+    this.showWaveText(waveNumber + 1);
+
+    this.remainingEnemies = wave.count;
+
+    // Spawna todos os inimigos dessa wave (pode espaçar no tempo se quiser)
+    for (let i = 0; i < wave.count; i++) {
+        this.time.delayedCall(i * 400, () => {
+            this.addEnemy(
+                Phaser.Math.RND.between(0, 11),
+                Phaser.Math.RND.between(0, 3),
+                wave.speed,
+                wave.power
+            );
+        });
+    }
+    }
+
+    showVictory() {
+        this.time.delayedCall(2000, () => {
+        this.scene.stop(); // Opcional: para limpar a cena do Game
+        this.scene.start('CutsceneFinal');
+        });
+    }
+
+    showWaveText(wave) {
+    if (this.waveText) this.waveText.destroy();
+    this.waveText = this.add.text(this.centreX, 100, `WAVE ${wave}`, {
+        fontFamily: 'Arial Black', fontSize: 56, color: '#ffd700',
+        stroke: '#000000', strokeThickness: 8,
+        align: 'center'
+    }).setOrigin(0.5).setDepth(101);
+
+    // Some depois de 2 segundos
+    this.time.delayedCall(2000, () => {
+        this.waveText.destroy();
+    });
+    }
+
     updateScore(points) {
         this.score += points;
         this.scoreText.setText(`Score: ${this.score}`);
@@ -226,7 +314,7 @@ export class Game extends Phaser.Scene {
 
     GameOver() {
         this.gameStarted = false;
-        
+        // this.gameOverText.setVisible(true);
         this.scene.stop();
         this.scene.start('GameOver');
     }

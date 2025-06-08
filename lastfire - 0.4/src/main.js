@@ -3,7 +3,8 @@ import { Preloader } from './scenes/Preloader.js';
 import { Start } from './scenes/Start.js';
 import { Game } from './scenes/Game.js';
 import { GameOver } from './scenes/GameOver.js';
-import { PauseMenu } from './scenes/PauseMenu.js'; // Adicione isto
+import { PauseMenu } from './scenes/PauseMenu.js'; 
+import { CutsceneFinal } from './scenes/CutsceneFinal.js';
 
 const config = {
     type: Phaser.AUTO,
@@ -27,7 +28,8 @@ const config = {
         Start,
         Game,
         GameOver,
-        PauseMenu
+        PauseMenu,
+        CutsceneFinal
     ],
     scale: {
         mode: Phaser.Scale.FIT,
