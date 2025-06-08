@@ -13,14 +13,29 @@ export class PauseMenu extends Phaser.Scene {
 
     create() {
     this.add.rectangle(640, 360, 1280, 720, 0x000000, 0.6);
+    
 
-    this.titleText = this.add.text(640, 200, 'PAUSADO', {
-        fontSize: '64px',
-        fill: '#ffff00',
-        fontFamily: '"Press Start 2P", monospace',
-        stroke: '#000000',
-        strokeThickness: 6
-    }).setOrigin(0.5);
+   this.titleText = this.add.text(640, -100, 'PAUSADO', {
+        fontSize: '90px',
+        fill: '#ccddee',
+        fontFamily: 'Share Tech Mono',
+        shadow: {
+            offsetX: 2,
+            offsetY: 2,
+            color: '#000033',
+            blur: 8,
+            stroke: true,
+            fill: true
+        }
+    }).setOrigin(0.5).setScale(0.2);
+
+    this.tweens.add({
+        targets: this.titleText,
+        y: 180,
+        scale: 1.0,
+        duration: 1500,
+        ease: 'Bounce.easeOut',
+    });
 
     this.pauseMusic = this.sound.add('pauseMusic', {
         loop: true,
@@ -180,26 +195,20 @@ export class PauseMenu extends Phaser.Scene {
 
     createPixelButton(x, y, label, callback) {
     const btn = this.add.text(x, y, label, {
-        fontFamily: '"Press Start 2P", monospace',
-        fontSize: '28px',
-        fill: '#00ff00',
-        backgroundColor: '#000000',
-        padding: { left: 20, right: 20, top: 10, bottom: 10 },
-        stroke: '#00ff00',
-        strokeThickness: 2,
-        align: 'center'
+        fontFamily: 'Share Tech Mono',
+        fontSize: '24px',
+        fill: '#aaccee',
+        stroke: '#224488',
+        strokeThickness: 1,
+        padding: { left: 15, right: 15, top: 8, bottom: 8 },
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
     btn.on('pointerover', () => {
-        const index = this.buttons.indexOf(btn);
-        if (index !== -1) {
-            this.selectedIndex = index;
-            this.updateButtonSelection();
-        }
+        btn.setStyle({ fill: '#ffffff', stroke: '#88bbff' });
     });
 
     btn.on('pointerout', () => {
-        this.updateButtonSelection();
+        btn.setStyle({ fill: '#aaccee', stroke: '#224488' });
     });
 
     btn.on('pointerdown', callback);
@@ -208,23 +217,21 @@ export class PauseMenu extends Phaser.Scene {
     }
 
     updateButtonSelection() {
-    this.buttons.forEach((btn, index) => {
-        if (index === this.selectedIndex) {
-            btn.setStyle({
-                fill: '#ffff00',
-                stroke: '#ffff00',
-                backgroundColor: '#003300',
-                fontSize: '32px'
-            });
-        } else {
-            btn.setStyle({
-                fill: '#00ff00',
-                stroke: '#00ff00',
-                backgroundColor: '#000000',
-                fontSize: '28px'
-            });
-        }
-    });
+        this.buttons.forEach((btn, index) => {
+            if (index === this.selectedIndex) {
+                btn.setStyle({
+                    fill: '#ffffff',
+                    stroke: '#ffff88',
+                    fontSize: '28px'
+                });
+            } else {
+                btn.setStyle({
+                    fill: '#aaccee',
+                    stroke: '#224488',
+                    fontSize: '24px'
+                });
+            }
+        });
     }
     
 }
