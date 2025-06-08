@@ -32,32 +32,32 @@ export class Start extends Phaser.Scene {
         this.add.image(this.cameras.main.width / 2, this.cameras.main.height / 2, 'logo')
             .setOrigin(0.5).setScale(0.9).setDepth(-1);
 
-        // TÍTULO
-        this.lastFireText = this.add.text(640, -100, 'LAST FIRE', {
-            fontSize: '90px',
-            fill: '#ccddee',
-            fontFamily: 'Share Tech Mono',
-            shadow: {
-                offsetX: 2,
-                offsetY: 2,
-                color: '#000033',
-                blur: 8,
-                stroke: true,
-                fill: true
+        // Criação do título
+        this.lastFireText = this.add.text(
+            this.cameras.main.width / 2,
+            -100,
+            'LAST FIRE',
+            {
+                fontSize: '90px',
+                fill: '#ccddee',
+                fontFamily: 'Share Tech Mono',
+                shadow: {
+                    offsetX: 2,
+                    offsetY: 2,
+                    color: '#000033',
+                    blur: 8,
+                    stroke: true,
+                    fill: true
+                }
             }
-        }).setOrigin(0.5).setScale(0.2);
+        ).setOrigin(0.5).setScale(0.2);
 
-        this.tweens.add({
-            targets: this.lastFireText,
-            y: 180,
-            scale: 1.0,
-            duration: 2500,
-            ease: 'Bounce.easeOut',
-        });
-
-        // TEXTO "APERTE QUALQUER TECLA"
-        this.pressAnyKeyText = this.add.text(this.cameras.main.width / 2, 500,
-            'APERTE QUALQUER TECLA PARA COMEÇAR', {
+        // Criação do texto de instrução, relativo ao título
+        this.pressAnyKeyText = this.add.text(
+            this.cameras.main.width / 2,
+            500,
+            'APERTE QUALQUER TECLA PARA COMEÇAR',
+            {
                 fontSize: '20px',
                 fill: '#ccddee',
                 fontFamily: 'Share Tech Mono',
@@ -69,7 +69,18 @@ export class Start extends Phaser.Scene {
                     stroke: true,
                     fill: true
                 }
-            }).setOrigin(0.5);
+            }
+        ).setOrigin(0.5);
+
+        // Tween do título, sempre ajustando o texto de instrução
+        this.tweens.add({
+            targets: this.lastFireText,
+            y: 180,
+            scale: 1.0,
+            duration: 2500,
+            ease: 'Bounce.easeOut',
+
+        });
 
         this.blinkTween = this.tweens.add({
             targets: this.pressAnyKeyText,
@@ -308,31 +319,48 @@ OBRIGADO POR JOGAR!`;
     }
 
     showHighScores() {
+        // Remove textos antigos do ranking
         this.highScoreTexts.forEach(t => t.destroy());
         this.highScoreTexts = [];
 
+        // Recupera os scores salvos
         const savedScores = localStorage.getItem('highScores');
         let scores = savedScores ? JSON.parse(savedScores) : [];
-
         scores.sort((a, b) => b.score - a.score);
         const topScores = scores.slice(0, 5);
 
-        const title = this.add.text(640, 580, 'TOP 5', {
-            fontSize: '20px',
-            fill: '#ffff00',
-            fontFamily: 'Share Tech Mono',
-            align: 'center'
-        }).setOrigin(0.5);
+        // --- AJUSTE DE POSICIONAMENTO ---
+        const baseY = 540;       // Posição vertical inicial do ranking
+        const titleOffset = 0;   // Offset do título em relação à baseY
+        const listOffset = 35;   // Offset da lista em relação à baseY
+        const lineSpacing = 30;  // Espaçamento entre linhas do ranking
 
-        this.highScoreTexts.push(title);
-
-        topScores.forEach((entry, index) => {
-            const text = this.add.text(640, 610 + index * 26, `${index + 1}. ${entry.name || 'Player'} - ${entry.score}`, {
-                fontSize: '16px',
-                fill: '#ffffff',
+        // Título do ranking
+        const title = this.add.text(
+            640, baseY + titleOffset,
+            'TOP 5',
+            {
+                fontSize: '20px',
+                fill: '#ffff00',
                 fontFamily: 'Share Tech Mono',
                 align: 'center'
-            }).setOrigin(0.5);
+            }
+        ).setOrigin(0.5);
+        this.highScoreTexts.push(title);
+
+        // Lista de scores
+        topScores.forEach((entry, index) => {
+            const text = this.add.text(
+                640,
+                baseY + listOffset + index * lineSpacing,
+                `${index + 1}. ${entry.name || 'Player'} - ${entry.score}`,
+                {
+                    fontSize: '16px',
+                    fill: '#ffffff',
+                    fontFamily: 'Share Tech Mono',
+                    align: 'center'
+                }
+            ).setOrigin(0.5);
             this.highScoreTexts.push(text);
         });
     }

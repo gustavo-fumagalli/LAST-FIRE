@@ -1,4 +1,3 @@
-// [IMPORTS]
 import ASSETS from '../assets.js';
 import ANIMATION from '../animation.js';
 import Player from '../gameObjects/Player.js';
@@ -99,19 +98,19 @@ export class Game extends Phaser.Scene {
     }
 
     initGameUi() {
-    this.hearts = [];
-    const heartXStart = 15;
-    const heartY = 10;
-    const heartSpacing = 50;
+        this.hearts = [];
+        const heartXStart = 15;
+        const heartY = 10;
+        const heartSpacing = 50;
 
-    this.maxHearts = 5; // <-- limite máximo para 5
+        this.maxHearts = 5; // <-- limite máximo para 5
 
-    for (let i = 0; i < this.maxHearts; i++) {
-        const heart = this.add.image(heartXStart + i * heartSpacing, heartY, 'heart');
-        heart.setScale(0.1).setScrollFactor(0).setDepth(100).setOrigin(0, 0);
-        heart.setVisible(false);
-        this.hearts.push(heart);
-    }
+        for (let i = 0; i < this.maxHearts; i++) {
+            const heart = this.add.image(heartXStart + i * heartSpacing, heartY, 'heart');
+            heart.setScale(0.1).setScrollFactor(0).setDepth(100).setOrigin(0, 0);
+            heart.setVisible(false);
+            this.hearts.push(heart);
+        }
 
         this.tutorialText = this.add.text(this.centreX, this.centreY, 'APERTE ESPAÇO PARA COMEÇAR!', {
             fontFamily: 'Arial Black', fontSize: 42, color: '#ffffff',
@@ -128,7 +127,7 @@ export class Game extends Phaser.Scene {
             stroke: '#000000', strokeThickness: 8, align: 'center'
         }).setOrigin(0.5).setDepth(100).setVisible(false);
 
-        // 👇 UI da barra do boss
+        //  UI da barra do boss
         this.bossHealthBarBg = this.add.graphics().setDepth(100).setVisible(false);
         this.bossHealthBar = this.add.graphics().setDepth(101).setVisible(false);
         this.bossNameText = this.add.text(this.centreX, this.scale.height - 40, '', {
@@ -141,15 +140,15 @@ export class Game extends Phaser.Scene {
         }).setOrigin(0.5).setDepth(102).setVisible(false);
     }
 
-   updateHealthDisplay(health) {
-    const maxDisplayHearts = this.maxHearts; // limite de corações visíveis (5)
-    const displayHealth = Phaser.Math.Clamp(health, 0, maxDisplayHearts);
+    updateHealthDisplay(health) {
+        const maxDisplayHearts = this.maxHearts; // limite de corações visíveis (5)
+        const displayHealth = Phaser.Math.Clamp(health, 0, maxDisplayHearts);
 
-    for (let i = 0; i < this.hearts.length; i++) {
-        this.hearts[i].setVisible(i < displayHealth);
+        for (let i = 0; i < this.hearts.length; i++) {
+            this.hearts[i].setVisible(i < displayHealth);
+        }
+
     }
-
-}
 
 
     initAnimations() {
@@ -181,14 +180,12 @@ export class Game extends Phaser.Scene {
         this.cursors = this.input.keyboard.createCursorKeys();
 
         this.input.keyboard.on('keydown-SPACE', () => {
-            if (this.gameStarted) {
-                this.fireBullet(this.player.x, this.player.y - 40);
-            } else {
+            if (!this.gameStarted) {
                 this.startGame();
             }
         });
 
-        // 👇 Atalho F7 para pular direto para o boss (modo dev)
+        //  Atalho F7 para pular direto para o boss (modo dev)
         this.input.keyboard.on('keydown-F7', () => {
             if (!this.gameStarted) {
                 this.startGame();
@@ -241,18 +238,18 @@ export class Game extends Phaser.Scene {
         this.remainingEnemies--;
 
         if (this.bossActive && enemy === this.boss) {
-    this.bossActive = false;
-    this.bossDefeated = true;
+            this.bossActive = false;
+            this.bossDefeated = true;
 
-    // 👇 Parar a música do boss
-    if (this.bossMusic && this.bossMusic.isPlaying) {
-        this.bossMusic.stop();
-    }
+            //  Parar a música do boss
+            if (this.bossMusic && this.bossMusic.isPlaying) {
+                this.bossMusic.stop();
+            }
 
-    this.hideBossHealthBar();
-    this.time.delayedCall(2000, () => this.showVictory());
-    return;
-}
+            this.hideBossHealthBar();
+            this.time.delayedCall(2000, () => this.showVictory());
+            return;
+        }
 
 
         if (this.remainingEnemies === 0 && !this.bossActive) {
@@ -266,28 +263,28 @@ export class Game extends Phaser.Scene {
     }
 
     spawnBoss() {
-    this.bossActive = true;
+        this.bossActive = true;
 
-    // Trocar background para o do boss
-    this.bg.setTexture('backgroundBoss');
+        // Trocar background para o do boss
+        this.bg.setTexture('backgroundBoss');
 
-    // Parar música atual e tocar música do boss
-    if (this.bgMusic && this.bgMusic.isPlaying) {
-        this.bgMusic.stop();
+        // Parar música atual e tocar música do boss
+        if (this.bgMusic && this.bgMusic.isPlaying) {
+            this.bgMusic.stop();
+        }
+        this.bossMusic = this.sound.add('bossMusic', { loop: true, volume: 0.5 });
+        this.bossMusic.play();
+
+        // Criar o boss normalmente
+        this.boss = new EnemyFlying(this, 0, 0, 0.0003, 10);
+        this.boss.health = 50;
+        this.boss.maxHealth = 50;
+        this.boss.setScale(3);
+        this.enemyGroup.add(this.boss);
+
+        this.showBossHealthBar(this.boss.health, this.boss.maxHealth);
+        this.showWaveText('BOSS FINAL');
     }
-    this.bossMusic = this.sound.add('bossMusic', { loop: true, volume: 0.5 });
-    this.bossMusic.play();
-
-    // Criar o boss normalmente
-    this.boss = new EnemyFlying(this, 0, 0, 0.0003, 10);
-    this.boss.health = 50;
-    this.boss.maxHealth = 50;
-    this.boss.setScale(3);
-    this.enemyGroup.add(this.boss);
-
-    this.showBossHealthBar(this.boss.health, this.boss.maxHealth);
-    this.showWaveText('BOSS FINAL');
-}
 
 
 
@@ -321,7 +318,7 @@ export class Game extends Phaser.Scene {
         if (enemy === this.boss && this.bossActive) {
             this.updateBossHealthBar(this.boss.health, this.boss.maxHealth);
         }
-        
+
     }
 
     startWave(waveNumber) {
@@ -354,6 +351,9 @@ export class Game extends Phaser.Scene {
             this.bgMusic.stop();
         }
 
+        // Salva o score no registry ANTES de trocar de cena
+        this.registry.set('lastscore', this.score);
+
         this.time.delayedCall(2000, () => {
             this.scene.stop();
             this.scene.start('CutsceneFinal');
@@ -377,18 +377,18 @@ export class Game extends Phaser.Scene {
     }
 
     GameOver() {
-    this.gameStarted = false;
+        this.gameStarted = false;
 
-    if (this.bgMusic && this.bgMusic.isPlaying) this.bgMusic.stop();
-    if (this.bossMusic && this.bossMusic.isPlaying) this.bossMusic.stop();
+        if (this.bgMusic && this.bgMusic.isPlaying) this.bgMusic.stop();
+        if (this.bossMusic && this.bossMusic.isPlaying) this.bossMusic.stop();
 
-    // Passa a pontuação para a cena GameOver via registry
-    this.registry.set('lastscore', this.score);
+        // Passa a pontuação para a cena GameOver via registry
+        this.registry.set('lastscore', this.score);
 
-    // Para a cena atual e inicia a cena de game over
-    this.scene.stop();
-    this.scene.start('GameOver');
-}
+        // Para a cena atual e inicia a cena de game over
+        this.scene.stop();
+        this.scene.start('GameOver');
+    }
 
 
     spawnHealthKit() {

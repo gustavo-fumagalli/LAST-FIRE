@@ -11,30 +11,40 @@ export class EnterName extends Phaser.Scene {
         const centreX = this.scale.width / 2;
         const centreY = this.scale.height / 2;
 
-        this.add.text(centreX, centreY - 100, 'Digite seu nome', {
-            fontFamily: 'Arial Black', fontSize: 32, color: '#ffffff',
-            stroke: '#000000', strokeThickness: 6
+        // Texto de instrução centralizado
+        this.add.text(centreX, centreY - 70, 'Digite seu nome', {
+            fontFamily: 'Arial Black',
+            fontSize: '32px',
+            color: '#ffffff',
+            stroke: '#000000',
+            strokeThickness: 6
         }).setOrigin(0.5);
 
-        // Criar um input HTML sobre o canvas Phaser
+        // INPUT HTML centralizado sobre o canvas (sempre no centro da tela)
         this.nameInput = document.createElement('input');
         this.nameInput.type = 'text';
         this.nameInput.maxLength = 12;
-        this.nameInput.style.position = 'absolute';
-        this.nameInput.style.top = `${centreY}px`;
-        this.nameInput.style.left = `${centreX - 100}px`;
+        this.nameInput.style.position = 'fixed'; // Fixa na tela
+        this.nameInput.style.top = '50%';
+        this.nameInput.style.left = '50%';
+        this.nameInput.style.transform = 'translate(-50%, -50%)';
         this.nameInput.style.width = '200px';
         this.nameInput.style.fontSize = '24px';
         this.nameInput.style.textAlign = 'center';
         this.nameInput.style.zIndex = 1000;
+        this.nameInput.autofocus = true;
 
         document.body.appendChild(this.nameInput);
         this.nameInput.focus();
 
-        // Botão de confirmar
+        // Botão "Confirmar" centralizado, logo abaixo do input
         this.confirmButton = this.add.text(centreX, centreY + 50, 'Confirmar', {
-            fontFamily: 'Arial Black', fontSize: 28, color: '#00ff00',
-            stroke: '#000000', strokeThickness: 6, backgroundColor: '#000000'
+            fontFamily: 'Arial Black',
+            fontSize: '28px',
+            color: '#00ff00',
+            stroke: '#000000',
+            strokeThickness: 6,
+            backgroundColor: '#000000'
         }).setOrigin(0.5).setInteractive();
 
         this.confirmButton.on('pointerdown', () => {
@@ -60,14 +70,16 @@ export class EnterName extends Phaser.Scene {
         localStorage.setItem('highScores', JSON.stringify(highScores));
 
         // Remover input do DOM
-        this.nameInput.remove();
+        if (this.nameInput && this.nameInput.parentNode) {
+            this.nameInput.remove();
+        }
 
         // Voltar para o menu inicial
         this.scene.start('Start');
     }
 
     shutdown() {
-        // Limpeza no caso de mudança abrupta de cena
+        // Limpeza para garantir que o input seja removido em qualquer troca de cena
         if (this.nameInput && this.nameInput.parentNode) {
             this.nameInput.remove();
         }
