@@ -73,9 +73,10 @@ Daniel Tsuyama
 
 ---
 
-<div class="intro">
+<div align="center">
   <img src="/assets/logo.png" width="256"/>
-  <div class="intro-text"><b>Prepare-se para a última batalha...</b></div>
+  <br/>
+  <b>Prepare-se para a última batalha...</b>
 </div>
 
 ---
