@@ -159,6 +159,27 @@ export class Game extends Phaser.Scene {
             frameRate: ANIMATION.explosion.frameRate,
             repeat: ANIMATION.explosion.repeat
         });
+
+        this.anims.create({
+        key: 'walk',
+        frames: [
+            { key: ASSETS.spritesheet.ships.key, frame: 8 },   // parado
+            { key: ASSETS.spritesheet.ships.key, frame: 9 },   // andando
+        ],
+        frameRate: 8,
+        repeat: -1
+        });
+
+        this.anims.create({
+            key: 'boss_attack',
+            frames: [
+                { key: ASSETS.spritesheet.ships.key, frame: 12 }, // boca fechada
+                { key: ASSETS.spritesheet.ships.key, frame: 13 }, // boca aberta
+                { key: ASSETS.spritesheet.ships.key, frame: 12 }, // volta para fechada
+            ],
+            frameRate: 10,
+            repeat: 0
+        });
     }
 
     initPhysics() {

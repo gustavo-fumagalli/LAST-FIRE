@@ -30,14 +30,14 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     }
 
     checkInput() {
-        const cursors = this.scene.cursors; // get cursors object from Game scene
+        const cursors = this.scene.cursors;
         const leftKey = cursors.left.isDown;
         const rightKey = cursors.right.isDown;
         const upKey = cursors.up.isDown;
         const downKey = cursors.down.isDown;
         const spaceKey = cursors.space.isDown;
 
-        const moveDirection = { x: 0, y: 0 }; // default move direction
+        const moveDirection = { x: 0, y: 0 };
 
         if (leftKey) moveDirection.x--;
         if (rightKey) moveDirection.x++;
@@ -45,8 +45,20 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         if (downKey) moveDirection.y++;
         if (spaceKey) this.fire();
 
-        this.body.velocity.x += moveDirection.x * this.velocityIncrement; // increase horizontal velocity
-        this.body.velocity.y += moveDirection.y * this.velocityIncrement; // increase vertical velocity
+        // Mover
+        this.body.velocity.x += moveDirection.x * this.velocityIncrement;
+        this.body.velocity.y += moveDirection.y * this.velocityIncrement;
+
+        // --- Animação de andar ---
+        if (leftKey || rightKey || upKey || downKey) {
+            if (!this.anims.isPlaying || this.anims.getName() !== 'walk') {
+                this.anims.play('walk');
+            }
+        } else {
+            // Nenhuma seta pressionada: frame parado
+            this.anims.stop();
+            this.setFrame(8); // Troque para o frame do sprite "parado" do soldado
+        }
     }
 
     fire() {
