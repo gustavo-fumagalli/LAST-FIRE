@@ -80,16 +80,16 @@ export class Game extends Phaser.Scene {
 
         this.currentWave = 0;
         this.waves = [
-            { count: 10, speed: 0.0002, power: 1, health: 1 },
-            { count: 12, speed: 0.0003, power: 1, health: 1 },
-            { count: 15, speed: 0.0003, power: 1, health: 1 },
-            { count: 18, speed: 0.0003, power: 1, health: 1 },
-            { count: 18, speed: 0.0003, power: 1, health: 2 },
-            { count: 20, speed: 0.0004, power: 2, health: 2 },
-            { count: 20, speed: 0.0004, power: 2, health: 2 },
-            { count: 22, speed: 0.0005, power: 2, health: 2 },
-            { count: 22, speed: 0.0005, power: 2, health: 2 },
-            { count: 25, speed: 0.0005, power: 2, health: 3 },
+            { count: 10, speed: 0.0002, power: 1, health: 1, shipId : 8 },
+            { count: 12, speed: 0.0003, power: 1, health: 1,  shipId : 8 },
+            { count: 15, speed: 0.0003, power: 1, health: 1,  shipId : 8 },
+            { count: 18, speed: 0.0003, power: 1, health: 1,  shipId : 8 },
+            { count: 18, speed: 0.0003, power: 1, health: 2,  shipId : 10 },
+            { count: 20, speed: 0.0004, power: 2, health: 2,  shipId : 10 },
+            { count: 20, speed: 0.0004, power: 2, health: 2,  shipId : 10 },
+            { count: 22, speed: 0.0005, power: 2, health: 2,  shipId : 10 },
+            { count: 22, speed: 0.0005, power: 2, health: 2,  shipId : 6 },
+            { count: 25, speed: 0.0005, power: 2, health: 3,  shipId : 6 },
         ];
         this.remainingEnemies = 0;
         this.spawnEnemyCounter = 0;
@@ -166,7 +166,7 @@ export class Game extends Phaser.Scene {
             { key: ASSETS.spritesheet.ships.key, frame: 8 },   // parado
             { key: ASSETS.spritesheet.ships.key, frame: 9 },   // andando
         ],
-        frameRate: 8,
+        frameRate: 5,
         repeat: -1
         });
 
@@ -359,7 +359,7 @@ export class Game extends Phaser.Scene {
         for (let i = 0; i < wave.count; i++) {
             this.time.delayedCall(i * 400, () => {
                 this.addEnemy(
-                    Phaser.Math.RND.between(8, 11),
+                    wave.shipId,
                     Phaser.Math.RND.between(0, 3),
                     wave.speed,
                     wave.power,

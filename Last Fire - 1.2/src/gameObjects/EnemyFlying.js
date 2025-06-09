@@ -18,6 +18,23 @@ export default class EnemyFlying extends Phaser.Physics.Arcade.Sprite {
     constructor(scene, shipId, pathId, speed = 0.002, power = 1, health = 1, isBoss = false) {
         const startingFrame = 12;
         super(scene, 0, 0, ASSETS.spritesheet.ships.key, startingFrame + shipId);
+        const animKey = `enemyFlying-${shipId}`;
+
+// Cria a animação apenas se ainda não foi criada
+if (!scene.anims.exists(animKey)) {
+    scene.anims.create({
+        key: animKey,
+        frames: [
+            { key: ASSETS.spritesheet.ships.key, frame: 12 + shipId },
+            { key: ASSETS.spritesheet.ships.key, frame: 12 + shipId + 1 }
+        ],
+        frameRate: 4,
+        repeat: -1
+    });
+}
+
+// Toca a animação
+this.play(animKey);
 
         this.scene = scene;
         this.power = power;
@@ -107,49 +124,42 @@ export default class EnemyFlying extends Phaser.Physics.Arcade.Sprite {
 
     // Spray frontal (boss)
     shootFrontalSpray() {
-    if (this.isBoss) {
-        this.anims.play('boss_attack', true);
-    }
+        const numBullets = 5;
+        const spread = Math.PI / 8;
+        const player = this.scene.player;
+        const baseAngle = Phaser.Math.Angle.Between(this.x, this.y, player.x, player.y);
 
-    const numBullets = 5;
-    const spread = Math.PI / 8;
-    const player = this.scene.player;
-    const baseAngle = Phaser.Math.Angle.Between(this.x, this.y, player.x, player.y);
-
-    for (let i = 0; i < numBullets; i++) {
-        const angle = baseAngle - spread/2 + (i * spread/(numBullets-1));
-        const speed = 400;
-        const vx = Math.cos(angle) * speed;
-        const vy = Math.sin(angle) * speed;
-        const bullet = new this.scene.EnemyBulletClass(this.scene, this.x, this.y, this.power, this.bossBulletFrame);
-        bullet.body.velocity.x = vx;
-        bullet.body.velocity.y = vy;
-        this.scene.enemyBulletGroup.add(bullet);
-    }
+        for (let i = 0; i < numBullets; i++) {
+            const angle = baseAngle - spread/2 + (i * spread/(numBullets-1));
+            const speed = 400;
+            const vx = Math.cos(angle) * speed;
+            const vy = Math.sin(angle) * speed;
+            const bullet = new this.scene.EnemyBulletClass(this.scene, this.x, this.y, this.power, this.bossBulletFrame);
+            bullet.body.velocity.x = vx;
+            bullet.body.velocity.y = vy;
+            this.scene.enemyBulletGroup.add(bullet);
+        }
     }
 
     // Cruz/diagonais (boss)
     shootDiagonal() {
-    if (this.isBoss) {
-        this.anims.play('boss_attack', true);
+        const angles = [
+            Math.PI/4,
+            (3*Math.PI)/4,
+            (5*Math.PI)/4,
+            (7*Math.PI)/4
+        ];
+        const speed = 350;
+        angles.forEach(angle => {
+            const vx = Math.cos(angle) * speed;
+            const vy = Math.sin(angle) * speed;
+            const bullet = new this.scene.EnemyBulletClass(this.scene, this.x, this.y, this.power, this.bossBulletFrame);
+            bullet.body.velocity.x = vx;
+            bullet.body.velocity.y = vy;
+            this.scene.enemyBulletGroup.add(bullet);
+        });
     }
 
-    const angles = [
-        Math.PI/4,
-        (3*Math.PI)/4,
-        (5*Math.PI)/4,
-        (7*Math.PI)/4
-    ];
-    const speed = 350;
-    angles.forEach(angle => {
-        const vx = Math.cos(angle) * speed;
-        const vy = Math.sin(angle) * speed;
-        const bullet = new this.scene.EnemyBulletClass(this.scene, this.x, this.y, this.power, this.bossBulletFrame);
-        bullet.body.velocity.x = vx;
-        bullet.body.velocity.y = vy;
-        this.scene.enemyBulletGroup.add(bullet);
-    });
-    }
     hit(damage) {
         this.health -= damage;
         if (this.health <= 0) this.die();
