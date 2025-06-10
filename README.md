@@ -58,23 +58,23 @@ Daniel Tsuyama
 
 -Acesse o link: https://gamejolt.com/games/last-fire/998457, desca um pouco a tela e clique em "Play".
 
-<h1>OU<h1/>
+---
 
-**💻 Como instalar e executar localmente**
+## 💻 Como instalar e executar localmente
 
 ### 1. Instale o Node.js
 
 - Baixe em: [https://nodejs.org/](https://nodejs.org/)
 - Clique em **“LTS”** e faça a instalação normalmente.
 
----
+
 
 ### 2. Baixe o jogo
 
 - Clique em **“Code” > “Download ZIP”** neste repositório.
 - Extraia o conteúdo do ZIP para uma pasta no seu computador.
 
----
+
 
 ### 3. Instale o Live Server
 
@@ -95,11 +95,5 @@ live-server
 O jogo abrirá automaticamente no navegador.
 
 Se não abrir, acesse: http://localhost:8080
-
-<div align="center">
-  <img src="lastfire%20-%201.0/assets/logo.png" width="256"/>
-  <br/>
-  <b>Prepare-se para a última batalha...</b>
-</div>
 
 ---
