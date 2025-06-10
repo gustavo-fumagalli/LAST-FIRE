@@ -90,6 +90,8 @@ No mesmo terminal, navegue até a pasta do jogo usando o comando **cd** e depois
 cd CAMINHO/DA/SUA/PASTA
 live-server
 ```
+<h6>(Obs: O caminho deve ir até a pasta que possui o arquivo *index.html*.)</h6>
+
 O jogo abrirá automaticamente no navegador.
 
 Se não abrir, acesse: http://localhost:8080
