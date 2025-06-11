@@ -33,6 +33,11 @@ export class Game extends Phaser.Scene {
             frameWidth: ANIMATION.explosion.frameWidth,
             frameHeight: ANIMATION.explosion.frameHeight
         });
+
+        this.load.spritesheet('bossDeath', 'assets/BossDeath.png', {
+        frameWidth: 64,
+        frameHeight: 64
+        });
     }
 
     // Cria os objetos, grupos e eventos iniciais da cena
@@ -200,6 +205,13 @@ export class Game extends Phaser.Scene {
             ],
             frameRate: 10,
             repeat: 0
+        });
+
+        this.anims.create({
+        key: 'boss_death',
+        frames: this.anims.generateFrameNumbers('bossDeath', { start: 0, end: 5 }),
+        frameRate: 8,
+        hideOnComplete: true
         });
     }
 

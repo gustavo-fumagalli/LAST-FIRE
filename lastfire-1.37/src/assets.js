@@ -32,6 +32,14 @@ export default {
                 frameWidth: 32,              // Cada frame tem 32x32 pixels
                 frameHeight: 32
             }]
+        },
+
+         bossDeath: {
+        key: 'bossDeath',
+        args: ['assets/BossDeath.png', {
+            frameWidth: 64,  // 1033 / 6 ≈ 172px
+            frameHeight: 64
+        }]
         }
     },
 

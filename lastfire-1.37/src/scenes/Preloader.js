@@ -47,6 +47,11 @@ export class Preloader extends Phaser.Scene {
                 this.load[type].apply(this.load, args); // Chama o método de loading correspondente (ex: this.load.image, this.load.audio, etc)
             }
         }
+
+        this.load.spritesheet('bossDeath', 'assets/BossDeath.png', {
+        frameWidth: 64,
+        frameHeight: 64
+    });
     }
 
     // Quando tudo está carregado, inicia a próxima cena

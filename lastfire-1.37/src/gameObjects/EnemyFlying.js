@@ -188,8 +188,24 @@ export default class EnemyFlying extends Phaser.Physics.Arcade.Sprite {
 
     // Função chamada quando o inimigo morre
     die() {
-        this.scene.addExplosion(this.x, this.y);  // Adiciona explosão na posição atual
-        this.remove();                            // Remove o inimigo da cena
+    if (this.isBoss) {
+        // Animação especial de morte do boss
+        const deathAnim = this.scene.add.sprite(this.x, this.y, 'bossDeath');
+
+        if (deathAnim) {
+            deathAnim.setDepth(100).setScale(3).play('boss_death');
+        } else {
+            console.warn('Erro: bossDeath sprite não foi carregado.');
+        }
+
+        // Toca som se estiver carregado
+        // this.scene.sound.play('bossDeathSound');
+    } else {
+        // Animação padrão de explosão para inimigos normais
+        this.scene.addExplosion(this.x, this.y);
+    }
+
+    this.remove(); // remove do grupo de inimigos
     }
 
     // Retorna o poder/dano do inimigo
